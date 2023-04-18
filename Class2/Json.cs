@@ -2,7 +2,7 @@ namespace oop2_2023_class1;
 
 class Json
 {
-    private class JsonException : Exception
+    public class JsonException : Exception
     {
         public JsonException(string message) : base(message)
         {
@@ -47,6 +47,8 @@ class Json
 
     public static Json FromString(string str)
     {
+        bool NotSpace(char c) => c != '\n' && c != '\t' && c != '\r' && c != ' ';
+        
         JsonArray ParseArray(string strJson)
         {
             var builder = new JsonArrayBuilder();
@@ -85,10 +87,21 @@ class Json
                     if (j == strJson.Length) throw new JsonException("Wrong format");
                     string key = strJson.Substring(i + 1, j - i - 1);
                     i = j + 1;
-                    while (i < strJson.Length && strJson[i] != ':') ++i;
+                    while (i < strJson.Length && strJson[i] != ':')
+                    {
+                        if (NotSpace(strJson[i]))
+                            throw new JsonException("Wrong format");
+                        ++i;
+                    }
                     if (i == strJson.Length) throw new JsonException("Wrong format");
+                    ++i;
                     while (i < strJson.Length && strJson[i] != '{' && strJson[i] != '[' &&
-                           !char.IsDigit(strJson[i])) ++i;
+                           !char.IsDigit(strJson[i]) && strJson[i] != '-')
+                    {
+                        if (NotSpace(strJson[i]))
+                            throw new JsonException("Wrong format");
+                        ++i;
+                    }
                     if (i == strJson.Length) throw new JsonException("Wrong format");
                     j = i + 1;
                     if (strJson[i] == '{' || strJson[i] == '[')
@@ -110,8 +123,12 @@ class Json
                     else
                     {
                         while (j < strJson.Length && char.IsDigit(strJson[j])) ++j;
-                        int value = int.Parse(strJson.Substring(i, j - i));
-                        builder.Add(key, value);
+                        if (int.TryParse(strJson.Substring(i, j - i), out int value))
+                        {
+                            builder.Add(key, value);
+                        }
+                        else
+                            throw new JsonException("Wrong format");
                     }
 
                     i = j - 1;

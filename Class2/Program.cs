@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-
-
-namespace oop2_2023_class1
+﻿namespace oop2_2023_class1
 {
     internal class Program
     {
